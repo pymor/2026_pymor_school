@@ -1,0 +1,126 @@
+% Adaptive model hierarchy figure for the data-driven-I lecture notebook.
+%
+% Adapted from the WIAS Berlin 2026 talk, with two changes:
+%   * the colors of the results plots at the end of the notebook (matplotlib C0/C1/C2),
+%   * the notation of the school notebooks:
+%       u_h(mu)              FOM solution in V_h            (rb_intro, data-driven-I)
+%       u_N(mu)              RB solution in V_N             (rb_intro)
+%       u_DD(mu)             DD solution in V_h, i.e. the reconstruction
+%                            Psi_N Phi_N(mu) of the DD prediction Phi_N(mu)
+%       Delta_N(.)           a posteriori error estimator applied to a candidate
+%                            solution (proposal -- the notebooks have no symbol
+%                            for it yet; the mu-dependence is implicit)
+%
+% Build with:
+%   latexmk -pdf model_hierarchy.tex
+%   pdftoppm -png -r 1200 model_hierarchy.pdf model_hierarchy   % -> -1.png, rename
+%   latexmk -dvi model_hierarchy.tex && dvisvgm --no-fonts --exact-bbox model_hierarchy.dvi
+% 1200 dpi matches the other figures in this directory.
+
+\documentclass[11pt,border=2mm]{standalone}
+
+\usepackage{amsmath}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows,positioning,calc}
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+% matplotlib's default colour cycle, so that the levels match the
+% model_colors = {'FOM': 'C0', 'RB': 'C1', 'DD': 'C2'} of the results plots
+% at the end of the notebook
+\definecolor{plotC0}{HTML}{1f77b4}
+\definecolor{plotC1}{HTML}{ff7f0e}
+\definecolor{plotC2}{HTML}{2ca02c}
+\definecolor{DarkGray}{rgb}{0.274509804,0.254901961,0.235294118}
+\definecolor{PaleGray}{rgb}{0.9,0.9,0.9}
+
+\colorlet{colorDD}{plotC2}
+\colorlet{colorRB}{plotC1}
+\colorlet{colorFOM}{plotC0}
+
+\tikzset{
+  input/.style={circle, minimum height=.6cm, text centered, draw=DarkGray,
+                fill=PaleGray, text=DarkGray, font=\small},
+  model/.style={rounded corners=0.35cm, minimum height=.7cm, minimum width=2.25cm,
+                text centered, text=DarkGray, font=\small},
+  estimator/.style={diamond, text centered, draw=DarkGray, fill=white,
+                    text=DarkGray, aspect=2.6, inner sep=0pt, font=\footnotesize},
+  output/.style={rectangle, minimum width=2.4cm, minimum height=.7cm, text centered,
+                 text=DarkGray, font=\small},
+  arrow/.style={thick, ->, >=stealth, draw=DarkGray},
+}
+
+\newcommand{\distbg}{0.28}
+% #1 west of, #2 north of, #3 east of, #4 south of, #5 name prefix
+\newcommand{\background}[5]{%
+  \begin{pgfonlayer}{background}
+    \path (#1.west |- #2.north)+(-\distbg,\distbg) node (a1) {};
+    \path (#3.east |- #4.south)+(\distbg,-\distbg) node (a2) {};
+    \path[fill=black!4, rounded corners, draw=black!30, thick] (a1) rectangle (a2);
+    \path (#3.east |- #2.north)+(0,\distbg)--(#1.west |- #2.north)+(0,\distbg) node[midway] (#5-n) {};
+  \end{pgfonlayer}%
+}
+
+% Overlay stages, in the spirit of beamer's \onslide: compile with
+%   pdflatex -jobname=model_hierarchy_stage3 "\def\stage{3}\input{model_hierarchy.tex}"
+% Elements not yet visible are drawn fully transparent rather than omitted, so
+% that every stage has exactly the same bounding box.
+\providecommand{\stage}{5}
+\tikzset{hidden/.style={opacity=0, text opacity=0}}
+\newcommand{\vis}[1]{\ifnum\stage<#1 hidden\fi}
+
+\begin{document}
+\begin{tikzpicture}[align=center, node distance=.8cm and 1.3cm]
+
+  \node (mu) [input] {\hspace*{-2pt}$\mu$\hspace*{-2pt}};
+
+  % --- the three levels, cheapest first -----------------------------------
+  \node (dd) [model, draw=colorDD, fill=colorDD!40, right=of mu, xshift=-5pt, \vis{2}] {DD-ROM};
+  \node (est-dd) [estimator, below=of dd, \vis{2}] {$\Delta_N\big(u_\mathrm{DD}(\mu)\big)\leq\varepsilon$};
+
+  \node (rb-rom) [model, draw=colorRB, fill=colorRB!40, right=of est-dd, \vis{3}] {RB-ROM};
+  \node (est-rb-rom) [estimator, below=of rb-rom, \vis{3}] {$\Delta_N\big(u_N(\mu)\big)\leq\varepsilon$};
+
+  \node (fom) [model, draw=colorFOM, fill=colorFOM!40, right=of est-rb-rom, \vis{4}] {FOM};
+
+  % --- returned solutions --------------------------------------------------
+  \node (out-rb-rom) [output, draw=colorRB, fill=colorRB!40, below=of est-rb-rom, \vis{3}]
+    {Return~$u_N(\mu)$};
+  \node (out-dd) [output, draw=colorDD, fill=colorDD!40, \vis{2}]
+    at ($(est-dd |- out-rb-rom)$) {Return~$u_\mathrm{DD}(\mu)$};
+  \node (out-fom) [output, draw=colorFOM, fill=colorFOM!40, \vis{4}]
+    at ($(fom |- out-rb-rom)$) {Return~$u_h(\mu)$};
+
+  \draw[arrow, \vis{2}] (out-dd.south) -- ($(out-dd.south)+(0,-0.4)$)
+    -- ($(out-dd.south)+(-2.6,-0.4)$);
+  \draw[arrow, \vis{3}] (out-rb-rom.south) -- ($(out-rb-rom.south)+(0,-0.4)$)
+    -- ($(out-dd.south)+(-2.6,-0.4)$);
+  \draw[arrow, \vis{4}] (out-fom.south) -- ($(out-fom.south)+(0,-0.4)$)
+    -- ($(out-dd.south)+(-2.6,-0.4)$);
+
+  % --- control flow --------------------------------------------------------
+  \draw[arrow, \vis{2}] (mu) -- (dd);
+  \draw[arrow, \vis{2}] (dd) -- (est-dd);
+  \draw[arrow, \vis{2}] (est-dd) -- (out-dd) node[pos=0.5, xshift=-11pt, text=DarkGray, \vis{2}]{\footnotesize Yes};
+  \draw[arrow, \vis{3}] (est-dd) -- (rb-rom) node[pos=0.5, yshift=7pt, text=DarkGray, \vis{3}]{\footnotesize No};
+  \draw[arrow, \vis{3}] (rb-rom) -- (est-rb-rom);
+  \draw[arrow, \vis{3}] (est-rb-rom) -- (out-rb-rom) node[pos=0.35, xshift=-11pt, text=DarkGray, \vis{3}]{\footnotesize Yes};
+  \draw[arrow, \vis{4}] (est-rb-rom) -- (fom) node[pos=0.5, yshift=7pt, text=DarkGray, \vis{4}]{\footnotesize No};
+  \draw[arrow, \vis{4}] (fom) -- (out-fom);
+
+  % --- adaptation: data flows back down the hierarchy ----------------------
+  \draw[arrow, dotted, align=center, \vis{5}] (rb-rom.north) to[out=90, in=0]
+    node[midway, fill=black!4, inner sep=2pt, text=DarkGray, \vis{5}]
+    {\scriptsize collect data to\\[-5pt]\scriptsize update DD-ROM} (dd.east);
+  \draw[arrow, dotted, align=center, \vis{5}] (fom.north) to[out=90, in=0]
+    node[midway, fill=black!4, inner sep=2pt, text=DarkGray, \vis{5}]
+    {\scriptsize collect data to\\[-5pt]\scriptsize update RB-ROM} (rb-rom.east);
+
+  \coordinate (bottom) at ($(out-fom)+(0,-0.85)$);
+  \background{est-dd}{dd}{fom}{bottom}{bg}
+
+  \node[anchor=north east, align=right, text=DarkGray] at (dd.north -| fom.east)
+    {Adaptive model hierarchy\\[-2pt]{\scriptsize with tolerance~$\varepsilon>0$}};
+
+\end{tikzpicture}
+\end{document}
