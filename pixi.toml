@@ -1,0 +1,29 @@
+[workspace]
+authors = ["Stephan Rave <stephanrave@uni-muenster.de>"]
+channels = ["conda-forge"]
+name = "2026"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+fenics-dolfinx = "0.10.*"
+pytorch-cpu = "*"
+python = "3.14.*"
+pymor = "2026.1.*"
+slycot = ">=0.7.0,<0.8"
+jupytext = ">=1.19.5,<2"
+scikit-learn = ">=1.9.0,<2"
+jupyterlab = ">=4.6.3,<5"
+ipython = ">=9.17.1,<10"
+k3d = ">=2.15.2,<3"          # pymor 2026.1.1 requires k3d<3
+pyqt6 = ">=6.11.0,<7"
+ipyparallel = ">=9.2.0,<10"
+pyopengl = ">=3.1.10,<4"
+meshio = ">=5.3.5,<6"
+pyevtk = ">=1.7.0,<2"
+lxml = ">=6.1.2,<7"
+xmljson = ">=0.2.1,<0.3"
+scikit-fem = ">=12.0.2,<13"
+pyvista = ">=0.48.4,<0.49"

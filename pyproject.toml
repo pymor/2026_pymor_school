@@ -1,0 +1,27 @@
+[project]
+name = "pymor-school-2026-lectures"
+version = "0.1.0"
+description = "Material for the pyMOR School 2026 lectures"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "jupytext>=1.19.5",
+    "pymor[full,scikit-learn]==2026.1.*",
+    "torch>=2.14.0",
+]
+
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cpu" },
+]
+torchvision = [
+  { index = "pytorch-cpu" },
+]
+
