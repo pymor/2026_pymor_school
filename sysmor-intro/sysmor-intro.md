@@ -13,7 +13,7 @@ kernelspec:
 
 ```{code-cell} ipython3
 # enable logging widget
-%load_ext pymor.tools.jupyter
+#%load_ext pymor.tools.jupyter
 ```
 
 +++ {"slideshow": {"slide_type": "slide"}}
@@ -48,7 +48,7 @@ pyMOR School and User Meeting 2026
 2. Transfer Function and Realizations<br/>
 3. Projection-based Model Order Reduction<br />
 4. System Analysis<br/>
-5. A Selection of MOR Methods<br/>
+5. Transfer Function Approximation<br/>
 </h2>
 
 +++ {"slideshow": {"slide_type": "slide"}}
@@ -101,7 +101,7 @@ Discrete-time systems (e.g., see [[Antoulas '05]](https://doi.org/10.1137/1.9780
 
 $$
 \begin{align*}
-  E \dot{x}_{k+1} & = A x_k + B u_k, \\
+  E x_{k+1} & = A x_k + B u_k, \\
   y_k & = C x_k + D u_k.
 \end{align*}
 $$
@@ -216,7 +216,7 @@ $$
 
 +++ {"slideshow": {"slide_type": "subslide"}}
 
-### Penzl Example ([MORWiki](https://morwiki.mpi-magdeburg.mpg.de/morwiki/index.php/Penzl%27s_FOM))
+### Penzl Example ([MORWiki](https://modelreduction.org/morwiki/index.php/Penzl%27s_FOM))
 
 ```{code-cell} ipython3
 ---
@@ -230,7 +230,7 @@ from pymor.models.iosys import LTIModel
 A1 = np.array([[-1, 100], [-100, -1]])
 A2 = np.array([[-1, 200], [-200, -1]])
 A3 = np.array([[-1, 400], [-400, -1]])
-A4 = sps.diags(np.arange(-1, -1001, -1), dtype=None)
+A4 = sps.diags(np.arange(-1., -1001., -1.))
 A = sps.block_diag((A1, A2, A3, A4), format='csc')
 B = np.ones((1006, 1))
 B[:6] = 10
@@ -656,8 +656,7 @@ $$
 - Model order reduction (MOR) $\leadsto$
   Find $W, V \in \mathbb{R}^{n \times r}$ such that $e_{\text{output}}(t)$ is
   small in a suitable sense.
-- We will focus on eigenvalue-based, energy-based and
-  interpolation-based methods today.
+- We will focus on interpolation-based methods today.
 
 +++ {"slideshow": {"slide_type": "subslide"}}
 
