@@ -18,10 +18,10 @@ kernelspec:
 
 +++ {"slideshow": {"slide_type": "slide"}}
 
-# System-theoretic Methods
+# Advanced System-theoretic Methods
 
 <h2>
-September 15, 2026<br/>
+September 16, 2026<br/>
 pyMOR School and User Meeting 2026
 </h2>
 
@@ -38,18 +38,6 @@ pyMOR School and User Meeting 2026
 <center>
 <img src="/files/sysmor-intro/figures/mor_system_fo_v2.svg" alt="mor" width="40%">
 </center>
-
-+++ {"slideshow": {"slide_type": "subslide"}}
-
-# Outline
-
-<h2>
-1. Linear Time-Invariant (LTI) Systems<br/>
-2. Transfer Function and Realizations<br/>
-3. Projection-based Model Order Reduction<br />
-4. System Analysis<br/>
-5. A Selection of MOR Methods<br/>
-</h2>
 
 +++ {"slideshow": {"slide_type": "slide"}}
 
@@ -109,7 +97,7 @@ from pymor.models.iosys import LTIModel
 A1 = np.array([[-1, 100], [-100, -1]])
 A2 = np.array([[-1, 200], [-200, -1]])
 A3 = np.array([[-1, 400], [-400, -1]])
-A4 = sps.diags(np.arange(-1, -1001, -1), dtype=None)
+A4 = sps.diags(np.arange(-1., -1001., -1.))
 A = sps.block_diag((A1, A2, A3, A4), format='csc')
 B = np.ones((1006, 1))
 B[:6] = 10
