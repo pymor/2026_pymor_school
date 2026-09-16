@@ -46,11 +46,11 @@ get_ipython().run_line_magic('load_ext', 'pymor.tools.jupyter')
 # * Find $\mu^*$ such that:
 #   $$ \mu^* := \operatorname*{arg\,max}_{\mu} \|u_h(\mu) - u_N(\mu)\|_{\text{space-time}},$$
 # * Compute the defect for the projection onto RB:
-#   $$ u_h^\perp(t; \mu) := u_h(t; \mu) - P_{V_N}(u_h(t; \mu))$$
+#   $$ u_h^\perp(t; \mu^*) := u_h(t; \mu^*) - P_{V_N}(u_h(t; \mu^*))$$
 # * Compress using POD:
-#   $$ W := POD([u_h^\perp(t_1; \mu), \ldots, u_h^\perp(t_{n_t}; \mu)], \varepsilon_{\text{POD}}, N_{\text{modes}})$$
+#   $$ W := POD([u_h^\perp(t_1; \mu^*), \ldots, u_h^\perp(t_{n_t}; \mu^*)], \varepsilon_{\text{POD}}, N_{\text{modes}})$$
 # * Extend reduced space:
-#   $$ V_N \leftarrow \operatorname{span}(V_n \cup W). $$
+#   $$ V_N \leftarrow \operatorname{span}(V_N \cup W). $$
 
 # ### Properties of POD-Greedy
 # * Cannot get stuck due to orthogonal projection.
@@ -86,7 +86,7 @@ get_ipython().run_line_magic('load_ext', 'pymor.tools.jupyter')
 # ### FOM in pyMOR
 
 # - We use pyMOR's builtin discretizer.
-# - Also defined in `pymor/models/examples.py`.
+# - Also defined in `pymor.models.examples`.
 
 # In[ ]:
 
@@ -114,6 +114,8 @@ problem = InstationaryProblem(
         dirichlet_data=ConstantFunction(value=0., dim_domain=2),
 
         neumann_data=ExpressionFunction('(0.45 < x[0] < 0.55) * -1000.', dim_domain=2),
+
+        outputs=[('l2', ConstantFunction(value=1, dim_domain=2))]
     ),
 
     T=1.,
@@ -161,7 +163,8 @@ fom.enable_caching('disk')
 
 from pymor.reductors.parabolic import ParabolicRBReductor
 coercivity_estimator = ExpressionParameterFunctional('1.', fom.parameters)
-reductor = ParabolicRBReductor(fom, product=fom.h1_0_semi_product, coercivity_estimator=coercivity_estimator)
+reductor = ParabolicRBReductor(fom, product=fom.h1_0_semi_product,
+                               coercivity_estimator=coercivity_estimator)
 
 
 # - Apply `rb_greedy` as before:
@@ -233,9 +236,9 @@ fom.visualize((U, U_RB, U - U_RB), legend=('Detailed Solution', 'Reduced Solutio
 # - Compute $i_1, \ldots, i_M$ and $\hat\psi_1, \ldots, \hat\psi_M$ offline from data (EI-Greedy).
 # 
 # - Solve
-#   $$\underline{V}^{\operatorname{T}} \cdot \hat{V} \cdot B^{-1} \cdot \Bigl[A(\underline{u}_N(\mu); \mu)_{i_k}\Bigr]_{k=1}^M = \underline{V}^{\operatorname{T}} \cdot l$$
+#   $$V^{\operatorname{T}} \cdot \hat{V} \cdot B^{-1} \cdot \Bigl[A(V\cdot\underline{u}_N(\mu); \mu)_{i_k}\Bigr]_{k=1}^M = V^{\operatorname{T}} \cdot l$$
 # 
-# - Offline-online decomposition by pre-computing $\underline{V}^{\operatorname{T}} \cdot \hat{V}$, $B$, and storing rows of $V$ in "neighborhoods" of the interpolation DOFs $i_k$.
+# - Offline-online decomposition by pre-computing $V^{\operatorname{T}} \cdot \hat{V}$, $B$, and storing rows of $V$ in "neighborhoods" of the interpolation DOFs $i_k$.
 
 # ### Example: quasi-linear Poisson equation
 # 
@@ -499,7 +502,7 @@ fom.visualize((AU, AU_ei))
 
 
 from pymor.algorithms.pod import pod
-rb, svals = pod(U, rtol=1e-4)
+rb, svals = pod(solutions, rtol=1e-4)
 
 
 # Reduce using `StationaryRBReductor`.
